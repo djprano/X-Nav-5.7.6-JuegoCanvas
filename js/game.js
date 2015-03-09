@@ -50,20 +50,20 @@ monsterImage.onload= function(){
 	monsterReady=true;
 };
 monsterImage.src = "images/monster.png"
+nivel=0;
 
 
-
+var i=0;
 // Game objects
 var hero = {
 	speed: 256 // movement in pixels per second
 };
 var hero_backup = {};
-var stone ={};
+var stones = new Array();
+stones.push({});
 var princess = {};
-var monster = {};
-var monster_backup = {};
-var monster2 = {};
-var monster2_backup = {};
+var monsters= new Array;
+monsters.push({});
 var princessesCaught = 0;
 
 // Handle keyboard controls
@@ -86,65 +86,106 @@ var reset = function () {
 	princess.x = 32 + (Math.random() * (canvas.width - 96));
 	princess.y = 32 + (Math.random() * (canvas.height - 96));
 
-	//stone
-
-	stone.x = 32 + (Math.random() * (canvas.width - 96));
-	stone.y = 32 + (Math.random() * (canvas.height - 96));
-
-	//mosnter
-	monster.x = 32 + (Math.random() * (canvas.width - 96));
-	monster.y = 32 + (Math.random() * (canvas.height - 96));
-
-	monster2.x = 32 + (Math.random() * (canvas.width - 96));
-	monster2.y = 32 + (Math.random() * (canvas.height - 96));
-
-
-
-
-
-	if(colision(stone,hero)||colision(stone,princess)|| colision(monster,princess)){
-		reset();
+	//stones
+	for(var i in stones){
+		stones[i].x = 32 + (Math.random() * (canvas.width - 96));
+		stones[i].y = 32 + (Math.random() * (canvas.height - 96));
 	}
 
-};
 
+	//mosnters
+	for (var i in monsters){
+
+		monsters[i].x = 32 + (Math.random() * (canvas.width - 96));
+		monsters[i].y = 32 + (Math.random() * (canvas.height - 96));
+	}
+
+	if(colision_stones(hero)||colision_stones(princess)){
+		reset();
+	}
+	
+	if(colision_monsters(hero)){
+		reset();
+	}
+	
+
+
+
+};
 //
-function colision (hero,obstaculo){
-	if(hero.x+32>obstaculo.x && hero.x<obstaculo.x+32){
-		if(hero.y+32>obstaculo.y && hero.y<obstaculo.y+32){
+function colision (object,obstaculo){
+	if(object.x+32>obstaculo.x && object.x<obstaculo.x+32){
+		if(object.y+32>obstaculo.y && object.y<obstaculo.y+32){
 			//hay colision
 			return true;
 		}
 	}
 	return false;
-};
+}
 
-function monster_move(monster,monster_backup,modifier){
-	if(!colision(monster,stone)){
-		if(monster.x<hero.x){
-			monster_backup.x = monster.x;
-			monster.x+=hero.speed * modifier/5;
-		}else{
-			monster_backup.x = monster.x;
-			monster.x-=hero.speed * modifier/5;
+function colision_stones(object){
+	for(var i in stones){
+		if(colision(object,stones[i])){
+			return true;
 		}
-		if(monster.y<hero.y){
-			monster_backup.y = monster.y;
-			monster.y+=hero.speed * modifier/5;
-		}else{
-			monster_backup.y = monster.y;
-			monster.y-=hero.speed * modifier/5;
+	}
+	return false;
+}
+
+function colision_monsters(object){
+	for(var i in monsters){
+		if(colision(object,monsters[i])){
+			return true;
 		}
-	}else{
-		monster.x=monster_backup.x;
-		monster.y=monster_backup.y;
+	}
+	return false;
+}
+
+
+function monster_move(monsters,modifier,nivel){
+	v=0;
+	switch(nivel) {
+		case 0:
+		v=20;
+		break;
+		case 1:
+		v=15;
+		break;
+		case 2:
+		v=12;
+		break;
+		case 3:
+		v=10;
+		break;
+	}
+	for (var i in monsters){
+		if(colision_stones(monsters[i])){
+			monsters[i].x=monsters[i].x0;
+			monsters[i].y=monsters[i].y0;
+		}else{
+			if(monsters[i].x<hero.x){
+
+				monsters[i].x0 = monsters[i].x;
+				monsters[i].x+=hero.speed * modifier/v;
+			}else{
+				monsters[i].x0 = monsters[i].x;
+				monsters[i].x-=hero.speed * modifier/v;
+			}
+			if(monsters[i].y<hero.y){
+				monsters[i].y0 = monsters[i].y;
+				monsters[i].y+=hero.speed * modifier/v;
+			}else{
+				monsters[i].y0 = monsters[i].y;
+				monsters[i].y-=hero.speed * modifier/v;
+			}
+		}
 	}
 }
 
 // Update game objects
 var update = function (modifier) {
 	if (38 in keysDown) { // Player holding up
-		if(hero.y>32 && !colision(hero,stone)){
+		if(hero.y>32 && !colision_stones(hero)){
 			hero_backup.y = hero.y;
 			hero.y -= hero.speed * modifier;
 		}else{
@@ -153,7 +194,7 @@ var update = function (modifier) {
 		
 	}
 	if (40 in keysDown) { // Player holding down
-		if(hero.y<canvas.height-64 && !colision(hero,stone)){
+		if(hero.y<canvas.height-64 && !colision_stones(hero)){
 			hero_backup.y = hero.y;
 			hero.y += hero.speed * modifier;			
 		}else{
@@ -161,7 +202,7 @@ var update = function (modifier) {
 		}
 	}
 	if (37 in keysDown) { // Player holding left
-		if(hero.x>32 && !colision(hero,stone)){
+		if(hero.x>32 && !colision_stones(hero)){
 			hero_backup.x = hero.x;
 			hero.x -= hero.speed * modifier;
 		}else{
@@ -169,7 +210,7 @@ var update = function (modifier) {
 		}
 	}
 	if (39 in keysDown) { // Player holding right
-		if(hero.x<canvas.width-64 && !colision(hero,stone)){
+		if(hero.x<canvas.width-64 && !colision_stones(hero)){
 			hero_backup.x = hero.x;
 			hero.x += hero.speed * modifier;
 		}else{
@@ -177,21 +218,48 @@ var update = function (modifier) {
 		}
 	}
 
+
 	// Are they touching?
 	if (colision(princess,hero)){
 		++princessesCaught;
-	reset();
-	}
-
-	//monster moving
-
-	monster_move(monster,monster_backup,modifier);
-	monster_move(monster2,monster2_backup,modifier);
-
-	if(colision(monster,hero)||colision(monster2,hero)){
-		princessesCaught=0;
+		if(princessesCaught==10){
+			nivel=1;
+			monsters.push({});
+			stones.push({});
+		}else if(princessesCaught==15){
+			nivel=2;
+			monsters.push({});
+			stones.push({});
+		}else if (princessesCaught==20) {
+			nivel=3;
+			monsters.push({});
+			stones.push({});
+			stones.push({});
+		}
 		reset();
 	}
+
+	if(colision_monsters(hero)){
+		princessesCaught=0;
+		nivel=0;
+		var m ={};
+		var s ={};
+		monsters=[m];
+		stones=[s];
+		reset();
+	}
+	//para que no se monten las piedras unas encima de otras
+	for(var i in stones){
+		for (var j in stones){
+			if(i!=j){
+				if(colision(stones[i],stones[j])){
+					reset();
+				}
+			}
+		}
+	}
+	//monster moving
+		monster_move(monsters,modifier,nivel);
 };
 
 // Draw everything
@@ -209,24 +277,24 @@ var render = function () {
 	}
 
 	if (stoneReady){
-		ctx.drawImage(stoneImage,stone.x,stone.y);
-	}
-	if (monsterReady){
-		ctx.drawImage(monsterImage,monster.x,monster.y);
-	}
-	if (monsterReady){
-		ctx.drawImage(monsterImage,monster2.x,monster2.y);
+		for (var i in stones){
+			ctx.drawImage(stoneImage,stones[i].x,stones[i].y);
+		}
 	}
 
-	jQuery('.heroe').text("x: "+hero.x+"     y: "+hero.y);
-	jQuery('.piedra').text("x: "+stone.x+"     y: "+stone.y);
-	$('.diferencia').text(hero.y-stone.y);
+	if (monsterReady){
+		for (var i in monsters){
+			ctx.drawImage(monsterImage,monsters[i].x,monsters[i].y);
+		}	
+	}
 	// Score
 	ctx.fillStyle = "rgb(250, 250, 250)";
 	ctx.font = "24px Helvetica";
 	ctx.textAlign = "left";
 	ctx.textBaseline = "top";
 	ctx.fillText("Princesses caught: " + princessesCaught, 32, 32);
+
+	ctx.fillText("Nivel: "+nivel,400,32);
 };
 
 // The main game loop
